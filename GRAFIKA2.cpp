@@ -10,13 +10,13 @@
 
 using namespace std;
 typedef float point3[3];
-typedef float point9[9];
-int model = 1;
-int n = 50;
+int model = 1; //startuje z chmura punktów
+int n = 20;
+point3** points;//siatka 
 static GLfloat theta[] = { 0.0, 0.0, 0.0 };
-point9** color;
+point3** color; //kolory
 
-void drawPoints(int n, point3** points) {
+void drawPoints() {
 	glBegin(GL_POINTS);
 	for (int i = 0; i <= n; i++) {
 		for (int ii = 0; ii <= n; ii++) {
@@ -26,29 +26,28 @@ void drawPoints(int n, point3** points) {
 	glEnd();
 }
 
-void drawLines(int n, point3** points) {
+void drawLines() {
 
 	for (int i = 0; i < n; i++) {
 		for (int ii = 0; ii < n; ii++) {
-			glBegin(GL_LINE_LOOP);
+			glBegin(GL_LINE_LOOP);//naniesienie trójkąta siatki 
 			glVertex3f(points[i][ii][0], points[i][ii][1], points[i][ii][2]);
 			glVertex3f(points[i + 1][ii][0], points[i + 1][ii][1], points[i + 1][ii][2]);
 			glVertex3f(points[i + 1][ii + 1][0], points[i + 1][ii + 1][1], points[i + 1][ii + 1][2]);
 			glEnd();
 		}
 	}
-
 }
 
-void drawTriangles(int n, point3** points) {
+void drawTriangles() {
 	for (int i = 0; i < n; i++) {
 		for (int ii = 0; ii < n; ii++) {
 			glBegin(GL_TRIANGLES);
 			glColor3f(color[i][ii][0], color[i][ii][1], color[i][ii][2]);
 			glVertex3f(points[i][ii][0], points[i][ii][1], points[i][ii][2]);
-			glColor3f(color[i + 1][ii][3], color[i + 1][ii][4], color[i + 1][ii][5]);
+			glColor3f(color[i+1][ii][0], color[i+1][ii][1], color[i+1][ii][2]);
 			glVertex3f(points[i + 1][ii][0], points[i + 1][ii][1], points[i + 1][ii][2]);
-			glColor3f(color[i + 1][ii + 1][6], color[i + 1][ii + 1][7], color[i + 1][ii + 1][8]);
+			glColor3f(color[i+1][ii+1][0], color[i+1][ii+1][1], color[i+1][ii+1][2]);
 			glVertex3f(points[i + 1][ii + 1][0], points[i + 1][ii + 1][1], points[i + 1][ii + 1][2]);
 			glEnd();
 
@@ -56,9 +55,9 @@ void drawTriangles(int n, point3** points) {
 			glBegin(GL_TRIANGLES);
 			glColor3f(color[i][ii][0], color[i][ii][1], color[i][ii][2]);
 			glVertex3f(points[i][ii][0], points[i][ii][1], points[i][ii][2]);
-			glColor3f(color[i + 1][ii][3], color[i + 1][ii][4], color[i + 1][ii][5]);
+			glColor3f(color[i][ii+1][0], color[i][ii+1][1], color[i][ii+1][2]);
 			glVertex3f(points[i][ii + 1][0], points[i][ii + 1][1], points[i][ii + 1][2]);
-			glColor3f(color[i + 1][ii + 1][6], color[i + 1][ii + 1][7], color[i + 1][ii + 1][8]);
+			glColor3f(color[i + 1][ii + 1][0], color[i + 1][ii + 1][1], color[i + 1][ii + 1][2]);
 			glVertex3f(points[i + 1][ii + 1][0], points[i + 1][ii + 1][1], points[i + 1][ii + 1][2]);
 			glEnd();
 		}
@@ -67,44 +66,36 @@ void drawTriangles(int n, point3** points) {
 
 void jajko() {
 	float u = 0, v = 0;
-	float udiff = 1.0 / n, vdiff = 1.0 / n;
-	point3** points;
-	points = new  point3 * [n + 1];
-	glTranslated(0, -(160 * pow(0.5, 4) - 320 * pow(0.5, 3) + 160 * pow(0.5, 2)) / 2, 0);
+	float udiff = 1.0 / n, vdiff = 1.0 / n; //n - liczba punktów na powierzchni jajka
+	glTranslated(0, -(160 * pow(0.5, 4) - 320 * pow(0.5, 3) + 160 * pow(0.5, 2)) / 2, 0);//obniżenie środka figury do centrum układu współrzędnych
+	
 	for (int i = 0; i <= n; i++) {
-		points[i] = new point3[n + 1];
-	}
-
-	for (int i = 0; i <= n; i++) {
-		v = 0;
+		v = 0;//obliczenie potęg w celu przyspieszenia obliczeń
 		float u2 = pow(u, 2);
 		float u3 = pow(u, 3);
 		float u4 = pow(u, 4);
 		float u5 = pow(u, 5);
-		for (int ii = 0; ii <= n; ii++) {
+
+		for (int ii = 0; ii <= n; ii++) {//obliczenie współrzędnych punktów
 			points[i][ii][0] = (-90 * u5 + 225 * u4 - 270 * u3 + 180 * u2 - 45 * u) * cos(M_PI * v);
 			points[i][ii][1] = 160 * u4 - 320 * u3 + 160 * u2;
 			points[i][ii][2] = (-90 * u5 + 225 * u4 - 270 * u3 + 180 * u2 - 45 * u) * sin(M_PI * v);
-			v += vdiff;
+			v =v+ vdiff;
 		}
-		u += udiff;
+		u = u+ udiff;
 	}
 
-
-
-	switch (model) {
+	switch (model) {//rysowanie jajka w określony sposób
 	case 1:
-		drawPoints(n, points);
+		drawPoints();
 		break;
 	case 2:
-		drawLines(n, points);
+		drawLines();
 		break;
 	case 3:
-		drawTriangles(n, points);
+		drawTriangles();
 		break;
 	}
-
-
 }
 
 void RenderScene()
@@ -189,23 +180,23 @@ void spinEgg()
 void main(void)
 {
 	srand(time(NULL));
-	color = new point9 * [n + 1];
+	color = new point3 * [n + 1];
 	for (int i = 0; i <= n; i++) {
-		color[i] = new point9[n + 1];
+		color[i] = new point3[n + 1];
 	}
 	for (int i = 0; i <= n; i++) {
 		for (int ii = 0; ii <= n; ii++) {
 			color[i][ii][0] = (rand() % 101) * 0.01;
 			color[i][ii][1] = (rand() % 101) * 0.01;
 			color[i][ii][2] = (rand() % 101) * 0.01;
-			color[i][ii][3] = (rand() % 101) * 0.01;
-			color[i][ii][4] = (rand() % 101) * 0.01;
-			color[i][ii][5] = (rand() % 101) * 0.01;
-			color[i][ii][6] = (rand() % 101) * 0.01;
-			color[i][ii][7] = (rand() % 101) * 0.01;
-			color[i][ii][8] = (rand() % 101) * 0.01;
 		}
 	}
+
+	points = new  point3 * [n + 1];
+	for (int i = 0; i <= n; i++) {
+		points[i] = new point3[n + 1]; // naniesienie punktów na płaszczyznę
+	}
+
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(300, 300);
 	glutCreateWindow("Jajko");
